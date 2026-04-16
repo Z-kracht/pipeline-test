@@ -13,7 +13,7 @@ const server = http.createServer((req, res) => {
   res.end(`
     <html>
       <body>
-        <h1>Z.Kracht Pipeline Test</h1>
+        <h1>Z.Kracht Pipeline Test v2</h1>
         <p>Server draait op poort ${PORT}</p>
         <p>Environment: ${process.env.NODE_ENV || 'development'}</p>
         <p>Timestamp: ${new Date().toISOString()}</p>
