@@ -1,0 +1,31 @@
+services:
+  app:
+    image: zkracht/pipeline-test:${IMAGE_TAG:-latest}
+    ports:
+      - "3099:3000"
+    environment:
+      - NODE_ENV=test
+      - PORT=3000
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  test-runner:
+    image: zkracht/pipeline-test:${IMAGE_TAG:-latest}
+    command: sh -c "sleep 5 && node test.js"
+    environment:
+      - TEST_URL=http://app:3000
+    networks:
+      - app-network
+    depends_on:
+      app:
+        condition: service_healthy
+
+networks:
+  app-network:
+    external: true

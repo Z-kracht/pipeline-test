@@ -1,0 +1,9 @@
+{
+  "name": "zkracht-pipeline-test",
+  "version": "1.0.0",
+  "description": "Test app voor CI/CD pipeline verificatie",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js"
+  }
+}
