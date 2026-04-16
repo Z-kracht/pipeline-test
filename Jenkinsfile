@@ -21,7 +21,7 @@ pipeline {
             steps {
                 script {
                     env.IMAGE_TAG = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                    env.BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    env.BRANCH = sh(script: 'git log -1 --format=%D HEAD | grep -oP "origin/\\K[^,\\s]+" | head -1', returnStdout: true).trim()
                     echo "Building ${DOCKER_IMAGE}:${IMAGE_TAG} (branch: ${BRANCH})"
                     sh "docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} -t ${DOCKER_IMAGE}:latest ."
                 }
@@ -76,7 +76,7 @@ pipeline {
 
         stage('Deploy to Production') {
             when {
-                branch 'main'
+                expression { env.BRANCH == 'main' }
             }
             steps {
                 sshagent(['deploy-ssh-key']) {
