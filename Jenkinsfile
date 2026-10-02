@@ -41,6 +41,8 @@ pipeline {
                             cd ${APPS_DIR}/${PROJECT_NAME} && \
                             export IMAGE_TAG=${IMAGE_TAG} && \
                             docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d"
+                        # HAG-6/21: pin de gedeployde tag in .env, anders rolt een latere handmatige 'docker compose up -d' stil terug.
+                        ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${STAGING_HOST} "cd ${APPS_DIR}/${PROJECT_NAME} && if grep -q '^IMAGE_TAG=' .env; then sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=${env.IMAGE_TAG}/' .env; else echo 'IMAGE_TAG=${env.IMAGE_TAG}' >> .env; fi && chmod 600 .env && grep -qx 'IMAGE_TAG=${env.IMAGE_TAG}' .env && echo '[deploy] .env gepind op IMAGE_TAG=${env.IMAGE_TAG}'"
                     """
                 }
             }
@@ -94,6 +96,8 @@ pipeline {
                             echo '\$(date -u +%Y-%m-%dT%H:%M:%SZ) ${PROJECT_NAME} ${IMAGE_TAG} ${BRANCH}' >> ${APPS_DIR}/deploy.log"
 
                         echo "Production deploy complete: ${PROJECT_NAME}:${IMAGE_TAG}"
+                        # HAG-6/21: pin de gedeployde tag in .env, anders rolt een latere handmatige 'docker compose up -d' stil terug.
+                        ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${PRODUCTION_HOST} "cd ${APPS_DIR}/${PROJECT_NAME} && if grep -q '^IMAGE_TAG=' .env; then sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=${env.IMAGE_TAG}/' .env; else echo 'IMAGE_TAG=${env.IMAGE_TAG}' >> .env; fi && chmod 600 .env && grep -qx 'IMAGE_TAG=${env.IMAGE_TAG}' .env && echo '[deploy] .env gepind op IMAGE_TAG=${env.IMAGE_TAG}'"
                     """
                 }
             }
