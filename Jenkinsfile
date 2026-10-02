@@ -52,6 +52,9 @@ pipeline {
             steps {
                 sshagent(['deploy-ssh-key']) {
                     sh """
+                        # Alleen het testbestand meesturen: de runtime-compose op de hosts heeft tijdzone-
+                        # mounts die (nog) niet in git staan, die mogen we hier niet overschrijven.
+                        scp -o StrictHostKeyChecking=no docker-compose.test.yml ${DEPLOY_USER}@${STAGING_HOST}:${APPS_DIR}/${PROJECT_NAME}/
                         echo "Running tests on staging..."
                         ssh ${DEPLOY_USER}@${STAGING_HOST} "\
                             cd ${APPS_DIR}/${PROJECT_NAME} && \
