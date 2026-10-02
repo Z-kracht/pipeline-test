@@ -42,7 +42,7 @@ pipeline {
                             export IMAGE_TAG=${IMAGE_TAG} && \
                             docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d"
                         # HAG-6/21: pin de gedeployde tag in .env, anders rolt een latere handmatige 'docker compose up -d' stil terug.
-                        ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${STAGING_HOST} "cd ${APPS_DIR}/${PROJECT_NAME} && if grep -q '^IMAGE_TAG=' .env; then sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=${env.IMAGE_TAG}/' .env; else echo >> .env; echo 'IMAGE_TAG=${env.IMAGE_TAG}' >> .env; fi && chmod 600 .env && grep -qx 'IMAGE_TAG=${env.IMAGE_TAG}' .env && echo '[deploy] .env gepind op IMAGE_TAG=${env.IMAGE_TAG}'"
+                        ssh ${DEPLOY_USER}@${STAGING_HOST} "cd ${APPS_DIR}/${PROJECT_NAME} && if grep -q '^IMAGE_TAG=' .env; then sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=${env.IMAGE_TAG}/' .env; else echo >> .env; echo 'IMAGE_TAG=${env.IMAGE_TAG}' >> .env; fi && chmod 600 .env && grep -qx 'IMAGE_TAG=${env.IMAGE_TAG}' .env && echo '[deploy] .env gepind op IMAGE_TAG=${env.IMAGE_TAG}'"
                     """
                 }
             }
@@ -54,7 +54,7 @@ pipeline {
                     sh """
                         # Alleen het testbestand meesturen: de runtime-compose op de hosts heeft tijdzone-
                         # mounts die (nog) niet in git staan, die mogen we hier niet overschrijven.
-                        scp -o StrictHostKeyChecking=no docker-compose.test.yml ${DEPLOY_USER}@${STAGING_HOST}:${APPS_DIR}/${PROJECT_NAME}/
+                        scp docker-compose.test.yml ${DEPLOY_USER}@${STAGING_HOST}:${APPS_DIR}/${PROJECT_NAME}/
                         echo "Running tests on staging..."
                         ssh ${DEPLOY_USER}@${STAGING_HOST} "\
                             cd ${APPS_DIR}/${PROJECT_NAME} && \
@@ -100,7 +100,7 @@ pipeline {
 
                         echo "Production deploy complete: ${PROJECT_NAME}:${IMAGE_TAG}"
                         # HAG-6/21: pin de gedeployde tag in .env, anders rolt een latere handmatige 'docker compose up -d' stil terug.
-                        ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${PRODUCTION_HOST} "cd ${APPS_DIR}/${PROJECT_NAME} && if grep -q '^IMAGE_TAG=' .env; then sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=${env.IMAGE_TAG}/' .env; else echo >> .env; echo 'IMAGE_TAG=${env.IMAGE_TAG}' >> .env; fi && chmod 600 .env && grep -qx 'IMAGE_TAG=${env.IMAGE_TAG}' .env && echo '[deploy] .env gepind op IMAGE_TAG=${env.IMAGE_TAG}'"
+                        ssh ${DEPLOY_USER}@${PRODUCTION_HOST} "cd ${APPS_DIR}/${PROJECT_NAME} && if grep -q '^IMAGE_TAG=' .env; then sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=${env.IMAGE_TAG}/' .env; else echo >> .env; echo 'IMAGE_TAG=${env.IMAGE_TAG}' >> .env; fi && chmod 600 .env && grep -qx 'IMAGE_TAG=${env.IMAGE_TAG}' .env && echo '[deploy] .env gepind op IMAGE_TAG=${env.IMAGE_TAG}'"
                     """
                 }
             }
