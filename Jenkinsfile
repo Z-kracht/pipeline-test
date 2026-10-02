@@ -54,13 +54,15 @@ pipeline {
                     sh """
                         # Alleen het testbestand meesturen: de runtime-compose op de hosts heeft tijdzone-
                         # mounts die (nog) niet in git staan, die mogen we hier niet overschrijven.
+                        # HAG-49: eigen compose-project (-p ...-test), anders vervangt en verwijdert
+                        # de testrun de staging-app (zelfde projectnaam 'pipeline-test').
                         scp docker-compose.test.yml ${DEPLOY_USER}@${STAGING_HOST}:${APPS_DIR}/${PROJECT_NAME}/
                         echo "Running tests on staging..."
                         ssh ${DEPLOY_USER}@${STAGING_HOST} "\
                             cd ${APPS_DIR}/${PROJECT_NAME} && \
                             export IMAGE_TAG=${IMAGE_TAG} && \
-                            docker compose -f docker-compose.test.yml down --remove-orphans 2>/dev/null || true && \
-                            docker compose -f docker-compose.test.yml up \
+                            docker compose -p ${PROJECT_NAME}-test -f docker-compose.test.yml down --remove-orphans 2>/dev/null || true && \
+                            docker compose -p ${PROJECT_NAME}-test -f docker-compose.test.yml up \
                                 --abort-on-container-exit \
                                 --exit-code-from test-runner"
                     """
@@ -72,7 +74,7 @@ pipeline {
                         sh """
                             ssh ${DEPLOY_USER}@${STAGING_HOST} "\
                                 cd ${APPS_DIR}/${PROJECT_NAME} && \
-                                docker compose -f docker-compose.test.yml down --remove-orphans" || true
+                                docker compose -p ${PROJECT_NAME}-test -f docker-compose.test.yml down --remove-orphans" || true
                         """
                     }
                 }

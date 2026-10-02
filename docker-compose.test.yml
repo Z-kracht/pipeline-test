@@ -1,8 +1,8 @@
 services:
   app:
     image: zkracht/pipeline-test:${IMAGE_TAG:-latest}
-    ports:
-      - "3099:3000"
+    # Geen gepubliceerde poort: de test-runner praat via het eigen netwerk
+    # (http://app:3000), en 3099 is van de staging-app (HAG-49).
     environment:
       - NODE_ENV=test
       - PORT=3000
