@@ -27,5 +27,8 @@ services:
         condition: service_healthy
 
 networks:
+  # Eigen netwerk per test-run, NIET het gedeelde externe app-network: daar heten
+  # meerdere containers 'app' (regelaar, yuki, maxado, ...), waardoor http://app:3000
+  # soms een andere app raakte (307, 'Title not found').
   app-network:
-    external: true
+    driver: bridge
