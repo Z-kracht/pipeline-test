@@ -21,7 +21,16 @@ pipeline {
             steps {
                 script {
                     env.IMAGE_TAG = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                    env.BRANCH = sh(script: 'git log -1 --format=%D HEAD | grep -oP "origin/\\K[^,\\s]+" | head -1', returnStdout: true).trim()
+                    // HAG-58: tak uit Jenkins' eigen checkout (GIT_BRANCH), niet uit `git log --format=%D`;
+                    // die koos een andere tak als die naar dezelfde commit wees en sloeg prod dan stil over (#37).
+                    def rawBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: ''
+                    if (!rawBranch || rawBranch == 'HEAD') {
+                        rawBranch = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    }
+                    env.BRANCH = rawBranch.replaceFirst(/^(refs\/remotes\/)?origin\//, '')
+                    if (!env.BRANCH || env.BRANCH == 'HEAD') {
+                        error "Tak niet te bepalen (GIT_BRANCH='${env.GIT_BRANCH}'); build gestopt in plaats van prod stil over te slaan"
+                    }
                     echo "Building ${DOCKER_IMAGE}:${IMAGE_TAG} (branch: ${BRANCH})"
                     sh "docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} -t ${DOCKER_IMAGE}:latest ."
                 }
