@@ -34,7 +34,8 @@ reviews:
         - SQL-injectie, XSS, SSRF, path traversal, onveilige deserialisatie
         - een /admin-route zonder autorisatiecheck aan de serverkant
         - wachtwoord-authenticatie: login is altijd een verificatiecode via Zeptomail
-        - een Docker-poortmapping zonder 127.0.0.1 (Docker omzeilt UFW; de poort staat dan open op internet)
+        - een Docker-poortmapping die niet aan loopback bindt: korte syntax moet met 127.0.0.1: beginnen,
+          lange syntax moet host_ip: 127.0.0.1 hebben (Docker omzeilt UFW; anders staat de poort open op internet)
         - e-mail via iets anders dan Zeptomail, betalingen via iets anders dan Mollie
         - emoji als icoon in de UI; icons zijn SVG uit Lucide of Heroicons
         - een .env of ander secret-bestand dat in git terechtkomt
@@ -42,8 +43,8 @@ reviews:
         magic numbers, en afwijkingen van de patronen in de omringende code.
     - path: "**/docker-compose*.yml"
       instructions: |
-        Elke ports-mapping moet beginnen met 127.0.0.1:. Een mapping als "${DB_PORT}:5432"
-        of "4001:8080" is een blokkerende fout. In docker-compose.yml (productie) en
+        Elke ports-mapping bindt aan loopback: korte syntax begint met 127.0.0.1:, lange syntax
+        heeft host_ip: 127.0.0.1. Een mapping als "${DB_PORT}:5432" of "4001:8080" is een blokkerende fout. In docker-compose.yml (productie) en
         docker-compose.staging.yml moeten ook de tijdzone-mounts aanwezig zijn
         (/usr/share/zoneinfo/Europe/Amsterdam en /etc/timezone); in dev-, test- en
         local-compose niet verplicht.
@@ -55,10 +56,11 @@ reviews:
       instructions: |
         Base images met een expliciete tag; geen :latest. Geen secrets via ARG of ENV.
         Geen COPY van .env.
-    - path: "src/app/admin/**"
+    - path: "{src/app,app}/**/{admin,(admin)}/**"
       instructions: |
-        Elke route hier heeft een serverkant-check op role === 'admin'. Een check alleen
-        in de UI telt niet. Blokkerend als die ontbreekt.
+        Elke route, controller of server action onder een admin-pad (Next.js: app/admin of app/(admin);
+        Laravel: app/Http/Controllers/Admin, routes met admin-middleware) heeft een serverkant-check
+        op de admin-rol. Een check alleen in de UI telt niet. Blokkerend als die ontbreekt.
 
 chat:
   auto_reply: true
