@@ -11,20 +11,19 @@ reviews:
   high_level_summary: true
   poem: false
   review_status: true
+  fail_commit_status: true
   collapse_walkthrough: false
   auto_review:
     enabled: true
     drafts: false
+    auto_pause_after_reviewed_commits: 0
     base_branches:
-      - main
-      - claude/main
+      - ".*"   # elke doelbranch (main, master, claude/main, release-branches)
   path_filters:
     # Referentiepagina's van de reglr-template: niet onze code, niet reviewen
     - "!**/(layout-pages)/**"
     - "!**/(no-layout-pages)/**"
     - "!**/node_modules/**"
-    - "!**/*.lock"
-    - "!**/package-lock.json"
   path_instructions:
     - path: "**/*"
       instructions: |
