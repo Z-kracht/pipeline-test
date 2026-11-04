@@ -1,0 +1,21 @@
+# Zet dit bestand in .github/workflows/ van elke app-repo. Het roept de
+# centrale repo-scan aan; de scanners en regels staan in Z-kracht/zkracht-security.
+#
+# De if-regel voorkomt dat déze workflow op een feature-branch draait. Het is
+# geen beveiliging tegen een ander workflow-bestand met runs-on: self-hosted;
+# dat regelen de runner group en de repo-toegang in de GitHub-instellingen
+# (zie zkracht-security/README.md).
+name: Security scan
+
+on:
+  schedule:
+    - cron: "7 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    uses: Z-kracht/zkracht-security/.github/workflows/repo-scan.yml@4c4f65a48c91a892985ecd03c87756d000718e5d  # zkracht-security main, 4 nov 2026 — bewust bijwerken
