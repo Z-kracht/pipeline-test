@@ -18,4 +18,4 @@ permissions:
 jobs:
   scan:
     if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-    uses: Z-kracht/zkracht-security/.github/workflows/repo-scan.yml@4c4f65a48c91a892985ecd03c87756d000718e5d  # zkracht-security main, 4 nov 2026 — bewust bijwerken
+    uses: Z-kracht/zkracht-security/.github/workflows/repo-scan.yml@c7cf51435cb05d37a79b599ab117d7b37453ae4c  # zkracht-security main, 4 nov 2026 (pin-fix) — bewust bijwerken
